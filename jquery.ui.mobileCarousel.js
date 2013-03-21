@@ -1,11 +1,12 @@
 /*!
  * jQuery Mobile Carousel
- * Source: https://github.com/blackdynamo/jQuery-Mobile-Carousel
+ * Source: https://github.com/jherencia/jQuery-Mobile-Carousel
  * Demo: http://jsfiddle.net/blackdynamo/yxhzU/
  * Blog: http://developingwithstyle.blogspot.com
  *
  * Copyright 2010, Donnovan Lewis
  * Edits: Benjamin Gleitzman (gleitz@mit.edu)
+ * Edits: Jaime Herencia Enjuto (jherencia@webpartners.es)
  * Licensed under the MIT
  */
 
@@ -87,7 +88,7 @@
         $.each(this.pages, function(i) {
           $(this).css({width: that.width, height: that.height});
         });
-        list.draggable({
+        this.list.draggable({
           axis: "y",
           start: function(event) {
             that.options.beforeStart.apply(that.list, arguments);
@@ -121,7 +122,7 @@
         return;
       }
       if (this.options.direction.toLowerCase() === "vertical") {
-        return Math.abs(start.coords[1] - stop.coords[1]);
+        return Math.abs(this.start.coords[1] - this.stop.coords[1]);
       }
       return Math.abs(this.start.coords[0] - this.stop.coords[0]);
     },
