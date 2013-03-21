@@ -1,6 +1,6 @@
 You must use the jquery.ui.ipad.js plugin in order for jQuery UI widgets to recognize mobile touch events as click events.
 
-Demo: http://jsfiddle.net/blackdynamo/yxhzU/
+Demo: http://jsfiddle.net/jherencia/R5SD5/
 
 Available options:
 
