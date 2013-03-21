@@ -10,164 +10,176 @@
  */
 
 (function($) {
-    $.fn.carousel = function(options) {
-        var settings = {
-            duration: 300,
-            direction: "horizontal",
-            minimumDrag: 20,
-            beforeStart: function(){},
-            afterStart: function(){},
-            beforeStop: function(){},
-            afterStop: function(){}
-        };
+  $.widget("ui.mobileCarousel", {
+    version: '1.0',
+    options: {
+      duration: 300,
+      direction: "horizontal",
+      minimumDrag: 20,
+      listSelector: '> ul',
+      beforeStart: function() {},
+      afterStart: function() {},
+      beforeStop: function() {},
+      afterStop: function() {}
+    },
+    _create: function() {
+      var that = this;
+      this.list = $(this.element).find(this.options.listSelector);
 
-        $.extend(settings, options || {});
+      // Check if selector has been initialized correctly
+      if (this.list.size() != 1) {
+        return;
+      }
 
-        return this.each(function() {
-            if (this.tagName.toLowerCase() != "ul") return;
+      // Initialize
+      this.pages = this.list.children();
+      this.width = $(this.element).width();
+      this.height = $(this.element).height();
+      this.currentPage = 0;
+      this.start = null;
+      this.end = null;
+      this.touchStart = false;
 
-            var originalList = $(this);
-            var pages = originalList.children();
-            var width = originalList.parent().width();
-            var height = originalList.parent().height();
+      // CSS
+      $(this.element).css({position: "relative", overflow: "hidden", width: this.width, height: this.height});
+      this.list.css({
+        position: "relative",
+        padding: "0",
+        margin: "0",
+        listStyle: "none",
+        width: this.pages.length * this.width
+      });
 
-            //Css
-            var containerCss = {position: "relative", overflow: "hidden", width: width, height: height};
-            var listCss = {position: "relative", padding: "0", margin: "0", listStyle: "none", width: pages.length * width};
-            var listItemCss = {width: width, height: height};
-
-            var container = $("<div>").css(containerCss);
-            var list = $("<ul>").css(listCss);
-
-            var currentPage = 1, start, stop;
-            if (settings.direction.toLowerCase() === "horizontal") {
-                list.css({float: "left"});
-                $.each(pages, function(i) {
-                    var li = $("<li>")
-                            .css($.extend(listItemCss, {float: "left"}))
-                            .html($(this).html());
-                    list.append(li);
-                });
-
-                list.draggable({
-                    axis: "x",
-                    start: function(event) {
-                        settings.beforeStart.apply(list, arguments);
-
-                        var data = event.originalEvent.touches ? event.originalEvent.touches[0] : event;
-                        start = {
-                            coords: [ data.pageX, data.pageY ]
-                        };
-
-                        settings.afterStart.apply(list, arguments);
-                    },
-                    stop: function(event) {
-                        settings.beforeStop.apply(list, arguments);
-
-                        var data = event.originalEvent.touches ? event.originalEvent.touches[0] : event;
-                        stop = {
-                            coords: [ data.pageX, data.pageY ]
-                        };
-
-                        start.coords[0] > stop.coords[0] ? moveLeft() : moveRight();
-
-                        function moveLeft() {
-                            if (currentPage === pages.length || dragDelta() < settings.minimumDrag) {
-                                list.animate({ left: "+=" + dragDelta()}, settings.duration);
-                                return;
-                            }
-                            var new_width = -1 * width * currentPage;
-                            list.animate({ left: new_width}, settings.duration);
-                            currentPage++;
-                        }
-
-                        function moveRight() {
-                            if (currentPage === 1 || dragDelta() < settings.minimumDrag) {
-                                list.animate({ left: "-=" + dragDelta()}, settings.duration);
-                                return;
-                            }
-                            var new_width = -1 * width * (currentPage - 1);
-                            list.animate({ left: -1 * width * (currentPage - 2)}, settings.duration);
-                            currentPage--;
-                        }
-
-                        function dragDelta() {
-                            return Math.abs(start.coords[0] - stop.coords[0]);
-                        }
-
-                        function adjustment() {
-                            return width - dragDelta();
-                        }
-
-                        settings.afterStop.apply(list, arguments);
-                    }
-                });
-            } else if (settings.direction.toLowerCase() === "vertical") {
-                $.each(pages, function(i) {
-                    var li = $("<li>")
-                            .css(listItemCss)
-                            .html($(this).html());
-                    list.append(li);
-                });
-
-                list.draggable({
-                    axis: "y",
-                    start: function(event) {
-                        settings.beforeStart.apply(list, arguments);
-
-                        var data = event.originalEvent.touches ? event.originalEvent.touches[0] : event;
-                        start = {
-                            coords: [ data.pageX, data.pageY ]
-                        };
-
-                        settings.afterStart.apply(list, arguments);
-                    },
-                    stop: function(event) {
-                        settings.beforeStop.apply(list, arguments);
-
-                        var data = event.originalEvent.touches ? event.originalEvent.touches[0] : event;
-                        stop = {
-                            coords: [ data.pageX, data.pageY ]
-                        };
-
-                        start.coords[1] > stop.coords[1] ? moveUp() : moveDown();
-
-                        function moveUp() {
-                            if (currentPage === pages.length || dragDelta() < settings.minimumDrag) {
-                                list.animate({ top: "+=" + dragDelta()}, settings.duration);
-                                return;
-                            }
-                            var new_width = -1 * height * currentPage;
-                            list.animate({ top: new_width}, settings.duration);
-                            currentPage++;
-                        }
-
-                        function moveDown() {
-                            if (currentPage === 1 || dragDelta() < settings.minimumDrag) {
-                                list.animate({ top: "-=" + dragDelta()}, settings.duration);
-                                return;
-                            }
-                            var new_width = -1 * height * (currentPage - 2);
-                            list.animate({ top: new_width}, settings.duration);
-                            currentPage--;
-                        }
-
-                        function dragDelta() {
-                            return Math.abs(start.coords[1] - stop.coords[1]);
-                        }
-
-                        function adjustment() {
-                            return height - dragDelta();
-                        }
-
-                        settings.afterStop.apply(list, arguments);
-                    }
-                });
-            }
-
-            container.append(list);
-
-            originalList.replaceWith(container);
+      if (this.options.direction.toLowerCase() === "horizontal") {
+        this.list.css({float: "left"});
+        $.each(this.pages, function(i) {
+          $(this).css({width: that.width, height: that.height, float: "left"});
         });
-    };
+        this.list.draggable({
+          axis: "x",
+          start: function(event) {
+            that.options.beforeStart.apply(that.list, arguments);
+
+            that.touchStart = true;
+            var data = event.originalEvent.touches ? event.originalEvent.touches[0] : event;
+            that.start = {
+              coords: [ data.pageX, data.pageY ]
+            };
+
+            that.options.afterStart.apply(that.list, arguments);
+          },
+          stop: function(event) {
+            that.options.beforeStop.apply(that.list, arguments);
+
+            var data = event.originalEvent.touches ? event.originalEvent.touches[0] : event;
+            that.stop = {
+              coords: [ data.pageX, data.pageY ]
+            };
+
+            that.start.coords[0] > that.stop.coords[0] ? that.moveLeft() : that.moveRight();
+            that.touchStart = false;
+
+            that.options.afterStop.apply(that.list, arguments);
+          }
+        });
+      }
+      else if (this.options.direction.toLowerCase() === "vertical") {
+        $.each(this.pages, function(i) {
+          $(this).css({width: that.width, height: that.height});
+        });
+        list.draggable({
+          axis: "y",
+          start: function(event) {
+            that.options.beforeStart.apply(that.list, arguments);
+
+            that.touchStart = true;
+            var data = event.originalEvent.touches ? event.originalEvent.touches[0] : event;
+            that.start = {
+              coords: [ data.pageX, data.pageY ]
+            };
+
+            that.options.afterStart.apply(that.list, arguments);
+          },
+          stop: function(event) {
+            that.options.beforeStop.apply(that.list, arguments);
+
+            var data = event.originalEvent.touches ? event.originalEvent.touches[0] : event;
+            that.stop = {
+              coords: [ data.pageX, data.pageY ]
+            };
+
+            that.start.coords[1] > that.stop.coords[1] ? that.moveUp() : that.moveDown();
+            that.touchStart = false;
+
+            that.options.afterStop.apply(that.list, arguments);
+          }
+        });
+      }
+    },
+    dragDelta: function() {
+      if (!this.start || !this.stop) {
+        return;
+      }
+      if (this.options.direction.toLowerCase() === "vertical") {
+        return Math.abs(start.coords[1] - stop.coords[1]);
+      }
+      return Math.abs(this.start.coords[0] - this.stop.coords[0]);
+    },
+    moveLeft: function(options) {
+      var lastPage = (this.currentPage === (this.pages.length - 1));
+      if (lastPage && !this.touchStart) {
+        return;
+      }
+      var dragDelta = this.dragDelta();
+      if (lastPage || (dragDelta < this.options.minimumDrag)) {
+        this.list.animate({ left: "+=" + dragDelta}, this.options.duration);
+        return;
+      }
+      var newWidth = -1 * this.width * (this.currentPage + 1);
+      this.list.animate({ left: newWidth}, this.options.duration);
+      this.currentPage++;
+    },
+    moveRight: function() {
+      var firstPage = (this.currentPage === 0);
+      if (firstPage && !this.touchStart) {
+        return;
+      }
+      var dragDelta = this.dragDelta();
+      if (firstPage || (dragDelta < this.options.minimumDrag)) {
+        this.list.animate({ left: "-=" + dragDelta}, this.options.duration);
+        return;
+      }
+      var newWidth = -1 * this.width * (this.currentPage - 1);
+      this.list.animate({ left: newWidth}, this.options.duration);
+      this.currentPage--;
+    },
+    moveUp: function() {
+      var lastPage = (this.currentPage === (this.pages.length - 1));
+      if (lastPage && !this.touchStart) {
+        return;
+      }
+      var dragDelta = this.dragDelta();
+      if (lastPage || (dragDelta < this.options.minimumDrag)) {
+        this.list.animate({ top: "+=" + dragDelta}, this.options.duration);
+        return;
+      }
+      var newWidth = -1 * this.height * (this.currentPage + 1);
+      this.list.animate({ top: newWidth}, this.options.duration);
+      this.currentPage++;
+    },
+    moveDown: function() {
+      var firstPage = (this.currentPage === 0);
+      if (firstPage && !this.touchStart) {
+        return;
+      }
+      var dragDelta = this.dragDelta();
+      if (firstPage || (dragDelta < this.options.minimumDrag)) {
+        this.list.animate({ top: "-=" + dragDelta}, this.options.duration);
+        return;
+      }
+      var newWidth = -1 * this.height * (this.currentPage - 1);
+      this.list.animate({ top: newWidth}, this.options.duration);
+      this.currentPage--;
+    }
+  });
 })(jQuery);
