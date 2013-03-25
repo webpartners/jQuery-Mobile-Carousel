@@ -21,7 +21,8 @@
       beforeStart: function() {},
       afterStart: function() {},
       beforeStop: function() {},
-      afterStop: function() {}
+      afterStop: function() {},
+      onChange: function() {}
     },
     _create: function() {
       var that = this;
@@ -139,6 +140,7 @@
       var newWidth = -1 * this.width * (this.currentPage + 1);
       this.list.animate({ left: newWidth}, this.options.duration);
       this.currentPage++;
+      this.options.onChange.apply(this);
     },
     moveRight: function() {
       var firstPage = (this.currentPage === 0);
@@ -153,6 +155,7 @@
       var newWidth = -1 * this.width * (this.currentPage - 1);
       this.list.animate({ left: newWidth}, this.options.duration);
       this.currentPage--;
+      this.options.onChange.apply(this);
     },
     moveUp: function() {
       var lastPage = (this.currentPage === (this.pages.length - 1));
@@ -167,6 +170,7 @@
       var newWidth = -1 * this.height * (this.currentPage + 1);
       this.list.animate({ top: newWidth}, this.options.duration);
       this.currentPage++;
+      this.options.onChange.apply(this);
     },
     moveDown: function() {
       var firstPage = (this.currentPage === 0);
@@ -181,6 +185,7 @@
       var newWidth = -1 * this.height * (this.currentPage - 1);
       this.list.animate({ top: newWidth}, this.options.duration);
       this.currentPage--;
+      this.options.onChange.apply(this);
     }
   });
 })(jQuery);
